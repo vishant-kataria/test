@@ -36,13 +36,12 @@ This repository contains the complete source code of the project built by **Team
 
 | Layer | Technologies |
 |-------|-------------|
-| **Frontend** | HTML, CSS, JavaScript |
-| **Backend** | *TBD* |
-| **Database** | *TBD* |
-| **AI / ML** | *TBD* |
-| **Deployment** | *TBD* |
+| **Frontend/App** | Python, Streamlit, Plotly |
+| **Logic/Data** | Pandas (mocked for demo) |
+| **AI / ML** | Simulated Responses for Demo |
+| **Deployment** | Local (`streamlit run`) |
 
-> The tech stack will be finalized and updated as the project evolves during the hackathon.
+> The tech stack is built around a rapid-prototyping architecture using Streamlit to showcase "Agentic" capabilities smoothly.
 
 ---
 
@@ -50,9 +49,12 @@ This repository contains the complete source code of the project built by **Team
 
 ```
 Hack_AI_2.0_project/
-├── index.html          # Main entry point
+├── app.py              # Main Streamlit Application
+├── requirements.txt    # Python dependencies
+├── .streamlit/         # Custom theming config
+├── index.html          # Legacy simple landing
 ├── README.md           # Project documentation
-└── ...                 # More files to come!
+└── ...                 
 ```
 
 ---
@@ -61,9 +63,8 @@ Hack_AI_2.0_project/
 
 ### Prerequisites
 
-- A modern web browser (Chrome, Firefox, Edge, etc.)
+- Python 3.8+
 - [Git](https://git-scm.com/) installed on your machine
-- Any additional dependencies will be listed here as the project grows
 
 ### Installation & Setup
 
@@ -74,10 +75,11 @@ git clone https://github.com/<your-username>/Hack_AI_2.0_project.git
 # Navigate into the project directory
 cd Hack_AI_2.0_project
 
-# Open the project in your browser
-start index.html        # Windows
-# or
-open index.html         # macOS
+# Install dependencies
+pip install -r requirements.txt
+
+# Run the Streamlit Application
+streamlit run app.py
 ```
 
 ---
