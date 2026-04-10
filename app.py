@@ -3030,7 +3030,7 @@ body {
             <a class="nav-link" href="#demo">Live Demo</a>
             <a class="nav-link" href="#testimonials">Testimonials</a>
         </div>
-        <div class="auth-btns">
+        <div class="auth-btns" style="display:none;">
             <button class="btn-signin" onclick="navigateTo('signin')">Sign In</button>
             <button class="btn-signup" onclick="navigateTo('signup')">Sign Up</button>
         </div>
@@ -3551,22 +3551,108 @@ function navigateTo(page) {
 </html>
     """
     
-    # Render directly using Streamlit components (works on Cloud + Local)
-    import streamlit.components.v1 as components
-    result = components.html(html_content, height=4000, scrolling=False)
+    # ── Inject CSS to style native Streamlit top-bar to match landing page ──
+    st.markdown("""
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
-    # Also add native Streamlit buttons as fallback navigation
-    # These appear below the landing page and always work
-    st.markdown("<br>", unsafe_allow_html=True)
-    col1, col2, col3 = st.columns([2, 1, 1])
-    with col2:
-        if st.button("✨ Sign In", key="landing_signin_btn", type="primary", use_container_width=True):
+    /* Hide default Streamlit padding for landing */
+    .block-container { padding-top: 0.5rem !important; }
+
+    /* ── Top Bar Container ── */
+    .cf-topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 8px;
+        margin-bottom: 0;
+    }
+    .cf-brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .cf-brand-logo {
+        width: 42px; height: 42px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #6366f1, #7c3aed);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        font-weight: 900;
+        color: white;
+        box-shadow: 0 4px 16px rgba(99,102,241,0.4);
+    }
+    .cf-brand-name {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 1.5rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #fff, #818cf8);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        letter-spacing: -0.5px;
+    }
+
+    /* ── Style the Streamlit buttons to match landing page ── */
+    div[data-testid="stHorizontalBlock"]:has(button[kind="secondary"][key*="topbar_signin"]),
+    div[data-testid="stHorizontalBlock"]:has(button[key*="topbar_signin"]) {
+        gap: 8px !important;
+    }
+    button[key*="topbar_signin"] {
+        background: transparent !important;
+        border: 1px solid rgba(255,255,255,0.12) !important;
+        color: #cbd5e1 !important;
+        border-radius: 10px !important;
+        font-weight: 600 !important;
+        font-size: 0.85rem !important;
+        padding: 9px 22px !important;
+        transition: all 0.25s ease !important;
+    }
+    button[key*="topbar_signin"]:hover {
+        color: #fff !important;
+        border-color: rgba(99,102,241,0.5) !important;
+        background: rgba(99,102,241,0.08) !important;
+    }
+    button[key*="topbar_signup"] {
+        background: linear-gradient(135deg, #6366f1, #7c3aed) !important;
+        border: none !important;
+        color: white !important;
+        border-radius: 10px !important;
+        font-weight: 600 !important;
+        font-size: 0.85rem !important;
+        padding: 9px 22px !important;
+        box-shadow: 0 4px 14px rgba(99,102,241,0.35) !important;
+        transition: all 0.25s ease !important;
+    }
+    button[key*="topbar_signup"]:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 22px rgba(99,102,241,0.5) !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+    # ── Native Streamlit Top Bar ──
+    brand_col, spacer_col, signin_col, signup_col = st.columns([3, 4, 1, 1])
+    with brand_col:
+        st.markdown("""
+        <div class="cf-brand">
+            <div class="cf-brand-logo">CF</div>
+            <div class="cf-brand-name">CareerForge</div>
+        </div>
+        """, unsafe_allow_html=True)
+    with signin_col:
+        if st.button("Sign In", key="topbar_signin", use_container_width=True):
             st.session_state.show_page = "signin"
             st.rerun()
-    with col3:
-        if st.button("🚀 Sign Up", key="landing_signup_btn", type="primary", use_container_width=True):
+    with signup_col:
+        if st.button("Sign Up", key="topbar_signup", type="primary", use_container_width=True):
             st.session_state.show_page = "signup"
             st.rerun()
+
+    # ── Render landing page HTML (visual only, auth buttons hidden) ──
+    import streamlit.components.v1 as components
+    components.html(html_content, height=4000, scrolling=False)
 
 
 # -----------------------------------------------------------------
