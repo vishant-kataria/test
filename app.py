@@ -3018,23 +3018,7 @@ body {
 <!-- Main Content -->
 <div class="main-content">
 
-    <!-- TOP BAR -->
-    <div class="top-bar">
-        <a class="brand-link" onclick="navigateTo('landing')">
-            <div class="brand-logo">CF</div>
-            <div class="brand-name">CareerForge</div>
-        </a>
-        <div class="nav-center">
-            <a class="nav-link" href="#features">Features</a>
-            <a class="nav-link" href="#how-it-works">How It Works</a>
-            <a class="nav-link" href="#demo">Live Demo</a>
-            <a class="nav-link" href="#testimonials">Testimonials</a>
-        </div>
-        <div class="auth-btns" style="display:none;">
-            <button class="btn-signin" onclick="navigateTo('signin')">Sign In</button>
-            <button class="btn-signup" onclick="navigateTo('signup')">Sign Up</button>
-        </div>
-    </div>
+    <!-- TOP BAR hidden — replaced by native Streamlit bar above -->
 
     <!-- HERO -->
     <div class="hero-section">
@@ -3551,26 +3535,30 @@ function navigateTo(page) {
 </html>
     """
     
-    # ── Inject CSS to style native Streamlit top-bar to match landing page ──
+    # ── CSS: Force dark background + style native top-bar ──
     st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
-    /* Hide default Streamlit padding for landing */
-    .block-container { padding-top: 0.5rem !important; }
-
-    /* ── Top Bar Container ── */
-    .cf-topbar {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 14px 8px;
-        margin-bottom: 0;
+    /* ── Force entire Streamlit app to dark background ── */
+    .stApp, [data-testid="stAppViewContainer"], [data-testid="stHeader"],
+    .main, .main .block-container, section[data-testid="stSidebar"] {
+        background: #0a0e1a !important;
     }
+    .block-container {
+        padding-top: 0.5rem !important;
+        padding-bottom: 0 !important;
+    }
+
+    /* ── Remove gap between topbar and iframe ── */
+    iframe { margin-top: -16px; }
+
+    /* ── Brand ── */
     .cf-brand {
         display: flex;
         align-items: center;
         gap: 12px;
+        padding: 6px 0;
     }
     .cf-brand-logo {
         width: 42px; height: 42px;
@@ -3594,14 +3582,10 @@ function navigateTo(page) {
         letter-spacing: -0.5px;
     }
 
-    /* ── Style the Streamlit buttons to match landing page ── */
-    div[data-testid="stHorizontalBlock"]:has(button[kind="secondary"][key*="topbar_signin"]),
-    div[data-testid="stHorizontalBlock"]:has(button[key*="topbar_signin"]) {
-        gap: 8px !important;
-    }
+    /* ── Style Sign In button ── */
     button[key*="topbar_signin"] {
         background: transparent !important;
-        border: 1px solid rgba(255,255,255,0.12) !important;
+        border: 1px solid rgba(255,255,255,0.15) !important;
         color: #cbd5e1 !important;
         border-radius: 10px !important;
         font-weight: 600 !important;
@@ -3612,8 +3596,10 @@ function navigateTo(page) {
     button[key*="topbar_signin"]:hover {
         color: #fff !important;
         border-color: rgba(99,102,241,0.5) !important;
-        background: rgba(99,102,241,0.08) !important;
+        background: rgba(99,102,241,0.1) !important;
     }
+
+    /* ── Style Sign Up button ── */
     button[key*="topbar_signup"] {
         background: linear-gradient(135deg, #6366f1, #7c3aed) !important;
         border: none !important;
@@ -3632,7 +3618,7 @@ function navigateTo(page) {
     </style>
     """, unsafe_allow_html=True)
 
-    # ── Native Streamlit Top Bar ──
+    # ── Native Streamlit Top Bar: brand left, buttons right ──
     brand_col, spacer_col, signin_col, signup_col = st.columns([3, 4, 1, 1])
     with brand_col:
         st.markdown("""
@@ -3650,7 +3636,7 @@ function navigateTo(page) {
             st.session_state.show_page = "signup"
             st.rerun()
 
-    # ── Render landing page HTML (visual only, auth buttons hidden) ──
+    # ── Render landing page HTML (top-bar removed from HTML) ──
     import streamlit.components.v1 as components
     components.html(html_content, height=4000, scrolling=False)
 
