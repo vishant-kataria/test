@@ -21,9 +21,14 @@ DB_OK = True
 # -----------------------------------------------------------------
 # PAGE CONFIG
 # -----------------------------------------------------------------
+# Load favicon
+import os as _os
+_logo_path = _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "static", "logo.png")
+_page_icon = _logo_path if _os.path.exists(_logo_path) else "🚀"
+
 st.set_page_config(
-    page_title="Agentic AI Career Coach",
-    page_icon="🚀",
+    page_title="CareerForge | AI Career Coach",
+    page_icon=_page_icon,
     layout="wide",
     initial_sidebar_state="collapsed",
 )
@@ -1953,10 +1958,18 @@ def render_landing_page():
     # via an unsandboxed iframe (allows navigation)
     # ==========================================
     import os
+    import base64 as b64
     
     # Create static directory for Streamlit
     static_dir = os.path.join(os.path.dirname(__file__), "static")
     os.makedirs(static_dir, exist_ok=True)
+    
+    # Load logo as base64 for embedding in HTML
+    logo_path = os.path.join(static_dir, "logo.png")
+    logo_b64 = ""
+    if os.path.exists(logo_path):
+        with open(logo_path, "rb") as f:
+            logo_b64 = b64.b64encode(f.read()).decode()
     
     html_content = """
 <!DOCTYPE html>
@@ -2060,16 +2073,17 @@ body {
 .loading-logo {
     width: 80px; height: 80px;
     border-radius: 20px;
-    background: linear-gradient(135deg, #6366f1, #7c3aed);
     display: flex;
     align-items: center;
     justify-content: center;
     animation: pulse-glow 1.5s ease-in-out infinite;
     box-shadow: 0 0 40px rgba(99,102,241,0.4);
+    overflow: hidden;
 }
-.loading-logo svg {
-    width: 40px;
-    height: 40px;
+.loading-logo img {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
 }
 @keyframes pulse-glow {
     0%, 100% { transform: scale(1); box-shadow: 0 0 40px rgba(99,102,241,0.4); }
@@ -2997,11 +3011,7 @@ body {
 <!-- Loading Screen -->
 <div class="loading-screen" id="loadingScreen">
     <div class="loading-logo">
-        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="white" opacity="0.9"/>
-            <path d="M12 6V14M8 10H16" stroke="rgba(99,102,241,0.6)" stroke-width="1.5" stroke-linecap="round"/>
-            <path d="M7 17L12 14.5L17 17" stroke="white" stroke-width="1.2" stroke-linecap="round" opacity="0.7"/>
-        </svg>
+        <img src="data:image/png;base64,""" + logo_b64 + """" alt="CF">
     </div>
     <div class="loading-bar-track">
         <div class="loading-bar-fill"></div>
@@ -3592,10 +3602,10 @@ function navigateTo(page) {
     .cf-brand-logo {
         width: 48px; height: 48px;
         border-radius: 14px;
-        background: linear-gradient(135deg, #6366f1, #7c3aed);
         display: flex;
         align-items: center;
         justify-content: center;
+        overflow: hidden;
         box-shadow: 0 6px 20px rgba(99,102,241,0.45);
         transition: all 0.3s ease;
     }
@@ -3603,9 +3613,10 @@ function navigateTo(page) {
         box-shadow: 0 8px 28px rgba(99,102,241,0.6);
         transform: scale(1.05);
     }
-    .cf-brand-logo svg {
-        width: 26px;
-        height: 26px;
+    .cf-brand-logo img {
+        width: 48px;
+        height: 48px;
+        object-fit: contain;
     }
     .cf-brand-name {
         font-family: 'Space Grotesk', sans-serif;
@@ -3658,14 +3669,10 @@ function navigateTo(page) {
     # ── Single-row navbar: brand left, buttons right ──
     brand_col, spacer, btn1_col, btn2_col = st.columns([2.5, 5, 1, 1])
     with brand_col:
-        st.markdown("""
+        st.markdown(f"""
         <div class="cf-brand">
             <div class="cf-brand-logo">
-                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="white" opacity="0.9"/>
-                    <path d="M12 6V14M8 10H16" stroke="rgba(99,102,241,0.6)" stroke-width="1.5" stroke-linecap="round"/>
-                    <path d="M7 17L12 14.5L17 17" stroke="white" stroke-width="1.2" stroke-linecap="round" opacity="0.7"/>
-                </svg>
+                <img src="data:image/png;base64,{logo_b64}" alt="CF">
             </div>
             <div class="cf-brand-name">CareerForge</div>
         </div>
