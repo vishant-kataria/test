@@ -1773,6 +1773,7 @@ def render_authenticated_navbar():
             <div style="display:flex; align-items:center; gap:12px;">
                 <div style="
                     width:38px; height:38px; border-radius:10px;
+                    background:#0f1225;
                     overflow:hidden;
                     display:flex; align-items:center; justify-content:center;
                     box-shadow:0 2px 10px rgba(99,102,241,0.35);
@@ -2081,6 +2082,7 @@ body {
 .loading-logo {
     width: 80px; height: 80px;
     border-radius: 20px;
+    background: #0f1225;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -3610,6 +3612,7 @@ function navigateTo(page) {
     .cf-brand-logo {
         width: 48px; height: 48px;
         border-radius: 14px;
+        background: #0f1225;
         display: flex;
         align-items: center;
         justify-content: center;
