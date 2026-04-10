@@ -1746,6 +1746,15 @@ def render_authenticated_navbar():
     name = st.session_state.full_name or st.session_state.username or "U"
     initials = "".join([w[0].upper() for w in name.split()[:2]])
 
+    # Load logo for navbar
+    import os as _os
+    import base64 as _b64
+    _logo_file = _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "static", "logo.png")
+    _nav_logo_b64 = ""
+    if _os.path.exists(_logo_file):
+        with open(_logo_file, "rb") as _f:
+            _nav_logo_b64 = _b64.b64encode(_f.read()).decode()
+
     st.markdown(
         f"""
         <div style="
@@ -1764,11 +1773,10 @@ def render_authenticated_navbar():
             <div style="display:flex; align-items:center; gap:12px;">
                 <div style="
                     width:38px; height:38px; border-radius:10px;
-                    background:linear-gradient(135deg, #6366f1, #7c3aed);
+                    overflow:hidden;
                     display:flex; align-items:center; justify-content:center;
-                    font-size:1.2rem; font-weight:800; color:white;
                     box-shadow:0 2px 10px rgba(99,102,241,0.35);
-                ">CF</div>
+                "><img src="data:image/png;base64,{_nav_logo_b64}" style="width:38px;height:38px;object-fit:contain;" alt="CF"></div>
                 <div style="
                     font-size:1.35rem; font-weight:800;
                     background:linear-gradient(135deg, #fff, #818cf8);
@@ -1854,11 +1862,11 @@ def render_signin_page():
         st.markdown("")
         col_a, col_b = st.columns(2)
         with col_a:
-            if st.button("ΓåÉ Back to Home", use_container_width=True):
+            if st.button("<- Back to Home", use_container_width=True):
                 st.session_state.show_page = "landing"
                 st.rerun()
         with col_b:
-            if st.button("Create Account ΓåÆ", use_container_width=True):
+            if st.button("Create Account ->", use_container_width=True):
                 st.session_state.show_page = "signup"
                 st.rerun()
 
@@ -1936,11 +1944,11 @@ def render_signup_page():
         st.markdown("")
         col_a, col_b = st.columns(2)
         with col_a:
-            if st.button("ΓåÉ Back to Home", key="back_home_su", use_container_width=True):
+            if st.button("<- Back to Home", key="back_home_su", use_container_width=True):
                 st.session_state.show_page = "landing"
                 st.rerun()
         with col_b:
-            if st.button("Already have an account? Sign In ΓåÆ", key="goto_signin", use_container_width=True):
+            if st.button("Already have an account? Sign In ->", key="goto_signin", use_container_width=True):
                 st.session_state.show_page = "signin"
                 st.rerun()
 
