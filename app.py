@@ -3534,47 +3534,88 @@ function navigateTo(page) {
 </body>
 </html>
     """
-    
-    # ── CSS: Force dark background + style native top-bar ──
+    # ── CSS: Full-width animated navbar + dark background + full-width content ──
     st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
-    /* ── Force entire Streamlit app to dark background ── */
+    /* ── Force dark background everywhere ── */
     .stApp, [data-testid="stAppViewContainer"], [data-testid="stHeader"],
     .main, .main .block-container, section[data-testid="stSidebar"] {
         background: #0a0e1a !important;
     }
+
+    /* ── Expand block-container to full width ── */
     .block-container {
-        padding-top: 0.5rem !important;
-        padding-bottom: 0 !important;
+        max-width: 100% !important;
+        padding: 0 !important;
     }
 
-    /* ── Remove gap between topbar and iframe ── */
-    iframe { margin-top: -16px; }
+    /* ── Animated Navbar ── */
+    .cf-navbar {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 40px;
+        background: rgba(10, 14, 26, 0.85);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+        z-index: 100;
+        animation: navbar-slide-down 0.6s ease-out;
+    }
+    .cf-navbar::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #6366f1, #818cf8, #a78bfa, #6366f1, transparent);
+        background-size: 200% 100%;
+        animation: gradient-flow 3s linear infinite;
+    }
+    @keyframes navbar-slide-down {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes gradient-flow {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+    }
 
     /* ── Brand ── */
     .cf-brand {
         display: flex;
         align-items: center;
-        gap: 12px;
-        padding: 6px 0;
+        gap: 14px;
+        animation: brand-fade-in 0.8s ease 0.2s both;
+    }
+    @keyframes brand-fade-in {
+        from { opacity: 0; transform: translateX(-16px); }
+        to { opacity: 1; transform: translateX(0); }
     }
     .cf-brand-logo {
-        width: 42px; height: 42px;
+        width: 44px; height: 44px;
         border-radius: 12px;
         background: linear-gradient(135deg, #6366f1, #7c3aed);
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.1rem;
+        font-size: 1.15rem;
         font-weight: 900;
         color: white;
-        box-shadow: 0 4px 16px rgba(99,102,241,0.4);
+        box-shadow: 0 4px 18px rgba(99,102,241,0.45);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .cf-brand-logo:hover {
+        transform: rotate(-5deg) scale(1.08);
+        box-shadow: 0 6px 24px rgba(99,102,241,0.6);
     }
     .cf-brand-name {
         font-family: 'Space Grotesk', sans-serif;
-        font-size: 1.5rem;
+        font-size: 1.6rem;
         font-weight: 700;
         background: linear-gradient(135deg, #fff, #818cf8);
         -webkit-background-clip: text;
@@ -3582,21 +3623,41 @@ function navigateTo(page) {
         letter-spacing: -0.5px;
     }
 
+    /* ── Auth Buttons Container ── */
+    .cf-auth-btns {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        animation: btns-fade-in 0.8s ease 0.4s both;
+    }
+    @keyframes btns-fade-in {
+        from { opacity: 0; transform: translateX(16px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+
+    /* ── Hide default Streamlit elements we don't need ── */
+    .cf-navbar-wrapper + div iframe {
+        margin-top: 0 !important;
+    }
+
     /* ── Style Sign In button ── */
     button[key*="topbar_signin"] {
-        background: transparent !important;
+        background: rgba(255,255,255,0.04) !important;
         border: 1px solid rgba(255,255,255,0.15) !important;
-        color: #cbd5e1 !important;
+        color: #e2e8f0 !important;
         border-radius: 10px !important;
         font-weight: 600 !important;
-        font-size: 0.85rem !important;
-        padding: 9px 22px !important;
-        transition: all 0.25s ease !important;
+        font-size: 0.88rem !important;
+        padding: 10px 28px !important;
+        min-width: 120px !important;
+        transition: all 0.3s ease !important;
+        letter-spacing: 0.3px !important;
     }
     button[key*="topbar_signin"]:hover {
         color: #fff !important;
         border-color: rgba(99,102,241,0.5) !important;
-        background: rgba(99,102,241,0.1) !important;
+        background: rgba(99,102,241,0.12) !important;
+        transform: translateY(-1px) !important;
     }
 
     /* ── Style Sign Up button ── */
@@ -3606,37 +3667,66 @@ function navigateTo(page) {
         color: white !important;
         border-radius: 10px !important;
         font-weight: 600 !important;
-        font-size: 0.85rem !important;
-        padding: 9px 22px !important;
+        font-size: 0.88rem !important;
+        padding: 10px 28px !important;
+        min-width: 120px !important;
         box-shadow: 0 4px 14px rgba(99,102,241,0.35) !important;
-        transition: all 0.25s ease !important;
+        transition: all 0.3s ease !important;
+        letter-spacing: 0.3px !important;
     }
     button[key*="topbar_signup"]:hover {
         transform: translateY(-2px) !important;
-        box-shadow: 0 6px 22px rgba(99,102,241,0.5) !important;
+        box-shadow: 0 6px 22px rgba(99,102,241,0.55) !important;
+    }
+
+    /* ── Fix Streamlit column gaps for buttons ── */
+    [data-testid="stHorizontalBlock"] {
+        align-items: center !important;
     }
     </style>
     """, unsafe_allow_html=True)
 
-    # ── Native Streamlit Top Bar: brand left, buttons right ──
-    brand_col, spacer_col, signin_col, signup_col = st.columns([3, 4, 1, 1])
-    with brand_col:
-        st.markdown("""
-        <div class="cf-brand">
-            <div class="cf-brand-logo">CF</div>
-            <div class="cf-brand-name">CareerForge</div>
+    # ── Animated Navbar (full-width HTML bar) ──
+    st.markdown("""
+    <div class="cf-navbar-wrapper">
+        <div class="cf-navbar">
+            <div class="cf-brand">
+                <div class="cf-brand-logo">CF</div>
+                <div class="cf-brand-name">CareerForge</div>
+            </div>
         </div>
-        """, unsafe_allow_html=True)
-    with signin_col:
-        if st.button("Sign In", key="topbar_signin", use_container_width=True):
-            st.session_state.show_page = "signin"
-            st.rerun()
-    with signup_col:
-        if st.button("Sign Up", key="topbar_signup", type="primary", use_container_width=True):
-            st.session_state.show_page = "signup"
-            st.rerun()
+    </div>
+    """, unsafe_allow_html=True)
 
-    # ── Render landing page HTML (top-bar removed from HTML) ──
+    # ── Sign In / Sign Up buttons (native Streamlit, right-aligned) ──
+    # Use negative margin to overlay them on the navbar
+    st.markdown("""
+    <style>
+    .btn-row-wrapper {
+        position: relative;
+        margin-top: -58px;
+        margin-bottom: 8px;
+        padding-right: 40px;
+        display: flex;
+        justify-content: flex-end;
+        z-index: 200;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+    spacer, btn_area = st.columns([7, 2])
+    with btn_area:
+        c1, c2 = st.columns(2)
+        with c1:
+            if st.button("Sign In", key="topbar_signin", use_container_width=True):
+                st.session_state.show_page = "signin"
+                st.rerun()
+        with c2:
+            if st.button("Sign Up", key="topbar_signup", type="primary", use_container_width=True):
+                st.session_state.show_page = "signup"
+                st.rerun()
+
+    # ── Render landing page HTML (full-width, no top-bar in HTML) ──
     import streamlit.components.v1 as components
     components.html(html_content, height=4000, scrolling=False)
 
