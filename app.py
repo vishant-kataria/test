@@ -871,6 +871,7 @@ def load_user_data():
         return
     user_id = st.session_state.user_id
     try:
+        # Load chat history
         saved_chats = db.get_chat_history(user_id)
         if saved_chats:
             st.session_state.chat_history = [
@@ -880,6 +881,34 @@ def load_user_data():
             welcome_msg = f"Hello {st.session_state.full_name or 'there'}! I'm your AI Career Coach. I can help with interview prep, resume advice, DSA strategies, and career planning. What would you like to work on today?"
             st.session_state.chat_history = [{"role": "ai", "content": welcome_msg}]
             db.save_chat_message(user_id, "ai", welcome_msg)
+
+        # Load latest resume analysis
+        try:
+            latest_resume = db.get_latest_resume_result(user_id)
+            if latest_resume:
+                st.session_state.resume_analysis = {
+                    "placement_score": latest_resume.get("score", 0),
+                    "skills": latest_resume.get("skills_found", []),
+                    "strengths": latest_resume.get("strengths", []),
+                    "weaknesses": latest_resume.get("weaknesses", []),
+                    "overall_feedback": latest_resume.get("suggestions", ""),
+                }
+                st.session_state.resume_analyzed = True
+        except Exception:
+            pass
+
+        # Load latest placement score
+        try:
+            latest_placement = db.get_latest_placement_score(user_id)
+            if latest_placement:
+                st.session_state.placement_data = {
+                    "score": latest_placement.get("score", 0),
+                    "dsa_score": latest_placement.get("dsa_score", 0),
+                    "aptitude_score": latest_placement.get("aptitude_score", 0),
+                }
+                st.session_state.placement_form_done = True
+        except Exception:
+            pass
     except Exception:
         pass
 
@@ -1114,6 +1143,20 @@ def render_resume_analyzer():
             if analysis:
                 st.session_state.resume_analysis = analysis
                 st.session_state.resume_analyzed = True
+                # --- Persist to database ---
+                if DB_OK and st.session_state.get("user_id"):
+                    try:
+                        db.save_resume_result(
+                            user_id=st.session_state.user_id,
+                            filename=uploaded_file.name,
+                            skills_found=analysis.get("skills", []),
+                            strengths=analysis.get("strengths", []),
+                            weaknesses=analysis.get("weaknesses", []) + analysis.get("missing_for_sde", []),
+                            score=analysis.get("placement_score", 0),
+                            suggestions=analysis.get("overall_feedback", ""),
+                        )
+                    except Exception:
+                        pass
                 st.rerun()
             else:
                 st.error("❌ Analysis failed. Please try again or upload in a different format.")
@@ -1291,6 +1334,18 @@ def render_placement_predictor():
             if result:
                 st.session_state.placement_data    = result
                 st.session_state.placement_form_done = True
+                # --- Persist to database ---
+                if DB_OK and st.session_state.get("user_id"):
+                    try:
+                        db.save_placement_score(
+                            user_id=st.session_state.user_id,
+                            score=result.get("score", 0),
+                            dsa_score=result.get("breakdown", {}).get("dsa", 0) if isinstance(result.get("breakdown"), dict) else 0,
+                            aptitude_score=result.get("breakdown", {}).get("aptitude", 0) if isinstance(result.get("breakdown"), dict) else 0,
+                            interview_score=result.get("breakdown", {}).get("interview_readiness", 0) if isinstance(result.get("breakdown"), dict) else 0,
+                        )
+                    except Exception:
+                        pass
                 st.rerun()
 
     if st.session_state.placement_data:
@@ -1467,9 +1522,21 @@ def render_ai_mentor():
             with q_cols[i]:
                 if st.button(qp, key=f"qp_{i}"):
                     st.session_state.chat_history.append({"role": "user", "content": qp})
+                    # Save user message to DB
+                    if DB_OK and st.session_state.get("user_id"):
+                        try:
+                            db.save_chat_message(st.session_state.user_id, "user", qp)
+                        except Exception:
+                            pass
                     with st.spinner("🤖 Thinking…"):
                         reply = ai_mentor_reply(st.session_state.chat_history)
                     st.session_state.chat_history.append({"role": "ai", "content": reply})
+                    # Save AI reply to DB
+                    if DB_OK and st.session_state.get("user_id"):
+                        try:
+                            db.save_chat_message(st.session_state.user_id, "ai", reply)
+                        except Exception:
+                            pass
                     st.rerun()
         st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
 
@@ -1497,14 +1564,33 @@ def render_ai_mentor():
     if len(st.session_state.chat_history) > 1:
         if st.button("🗑️ Clear Chat"):
             st.session_state.chat_history = [st.session_state.chat_history[0]]
+            # Clear from DB too
+            if DB_OK and st.session_state.get("user_id"):
+                try:
+                    db.clear_chat_history(st.session_state.user_id)
+                    db.save_chat_message(st.session_state.user_id, "ai", st.session_state.chat_history[0]["content"])
+                except Exception:
+                    pass
             st.rerun()
 
     # Main chat input (always at bottom)
     if prompt := st.chat_input("Ask me anything — interview tips, DSA help, career advice…"):
         st.session_state.chat_history.append({"role": "user", "content": prompt})
+        # Save user message to DB
+        if DB_OK and st.session_state.get("user_id"):
+            try:
+                db.save_chat_message(st.session_state.user_id, "user", prompt)
+            except Exception:
+                pass
         with st.spinner("🤖 Thinking…"):
             reply = ai_mentor_reply(st.session_state.chat_history)
         st.session_state.chat_history.append({"role": "ai", "content": reply})
+        # Save AI reply to DB
+        if DB_OK and st.session_state.get("user_id"):
+            try:
+                db.save_chat_message(st.session_state.user_id, "ai", reply)
+            except Exception:
+                pass
         st.rerun()
 
 
@@ -1588,6 +1674,20 @@ def render_mock_interview():
                         fb = ai_evaluate_answer(q.get("question", ""), answer, q_type)
                     if fb:
                         st.session_state.interview_feedback = fb
+                        # --- Persist interview score to DB ---
+                        if DB_OK and st.session_state.get("user_id"):
+                            try:
+                                db.save_interview_score(
+                                    user_id=st.session_state.user_id,
+                                    question=q.get("question", ""),
+                                    answer=answer,
+                                    correctness=fb.get("correctness", 0),
+                                    clarity=fb.get("clarity", 0),
+                                    depth=fb.get("depth", 0),
+                                    feedback=fb.get("detailed_feedback", ""),
+                                )
+                            except Exception:
+                                pass
                         st.rerun()
                     else:
                         st.error("Evaluation failed. Please try again.")
