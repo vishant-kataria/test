@@ -3551,19 +3551,9 @@ function navigateTo(page) {
 </html>
     """
     
-    # Write the HTML file
-    landing_path = os.path.join(static_dir, "landing.html")
-    with open(landing_path, "w", encoding="utf-8") as f:
-        f.write(html_content)
-    
-    # Embed via raw iframe without sandbox restrictions
-    st.markdown(
-        '<iframe src="/app/static/landing.html" '
-        'width="100%" height="4000" frameborder="0" '
-        'style="border:none; display:block;" '
-        'allow="scripts"></iframe>',
-        unsafe_allow_html=True
-    )
+    # Render directly using Streamlit components (works on Cloud + Local)
+    import streamlit.components.v1 as components
+    components.html(html_content, height=4000, scrolling=False)
 
 
 # -----------------------------------------------------------------
